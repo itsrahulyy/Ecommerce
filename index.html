@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VanillaCart - Modern E-Commerce</title>
+    <style>
+       
+    </style>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">VanillaCart</a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="#products">Collections</a>
+                <a href="#contact">Contact</a>
+                <a href="cart.html" class="cart-link">
+                    🛒 Cart (<span id="cart-count">0</span>)
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="products-section">
+        <div class="products-container" id="products-container"></div>
+    </section>
+
+    <script>
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        
+        fetch('https://dummyjson.com/products')
+            .then(res => res.json())
+            .then(data => {
+                renderProducts(data.products);
+                updateCartCount();
+            });
+
+        function renderProducts(products) {
+            const container = document.getElementById('products-container');
+            container.innerHTML = products.map(product => `
+                <div class="product-card">
+                    <div class="product-category">${product.category}</div>
+                    <img src="${product.thumbnail}" alt="${product.title}" class="product-image">
+                    <h3>${product.title}</h3>
+                    <div class="product-price">$${product.price}</div>
+                    <button class="add-to-cart" data-id="${product.id}">
+                        🛍️ Add to Cart
+                    </button>
+                </div>
+            `).join('');
+        }
+
+      
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('add-to-cart')) {
+                const productId = parseInt(e.target.dataset.id);
+                fetch(`https://dummyjson.com/products/${productId}`)
+                    .then(res => res.json())
+                    .then(product => {
+                        cart.push(product);
+                        localStorage.setItem('cart', JSON.stringify(cart));
+                        updateCartCount();
+                        // bounce animation
+                        e.target.style.transform = 'scale(1.2)';
+                        setTimeout(() => {
+                            e.target.style.transform = 'scale(1)';
+                        }, 200);
+                    });
+            }
+        });
+
+        function updateCartCount() {
+            document.querySelectorAll('#cart-count').forEach(element => {
+                element.textContent = cart.length;
+            });
+        }
+    </script>
+</body>
+</html>
